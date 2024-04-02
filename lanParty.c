@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define N 100 //definesc lungimea maxima a liniei dintr-un fisier intrare
 
 int main(int argc, char *argv[])
 {
     FILE *fis1, *fis2;
-    char line[N];
+    char line[100];
     fis1 = fopen("date/t1/d.in", "r");
     if(fis1 == NULL)
     {
