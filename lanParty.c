@@ -3,15 +3,19 @@
 
 int main(int argc, char *argv[])
 {
+    // ./lanParty c.in d.in out1.out
     FILE *fis1, *fis2;
-    char line[100];
-    fis1 = fopen("date/t1/d.in", "r");
+    char *line; 
+    fis1 = fopen(argv[2], "r");
+
     if(fis1 == NULL)
     {
         printf("Fisierul nu poate fi deschis pentru citire\n");
         exit(1);
     }
-    fis2 = fopen("out/r.out", "w");
+    fis2 = fopen(argv[3], "w");
+
+    
     if(fis2 == NULL)
     {
         printf("Fisierul nu poate fi deschis pentru scriere\n");
@@ -20,6 +24,7 @@ int main(int argc, char *argv[])
     while(fgets(line, sizeof(line), fis1)!=NULL){
         fputs(line, fis2);
     }
+
     fclose(fis1);
     fclose(fis2);
     return 0;
