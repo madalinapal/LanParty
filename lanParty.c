@@ -1,6 +1,6 @@
 #include "LanParty.h"
 #define L 15
-
+#define Ncerinte 5
 
 void addAtBeginning(Team **head, int v, char nume[100], FILE *fis)
 {
@@ -37,18 +37,91 @@ void addAtBeginning(Team **head, int v, char nume[100], FILE *fis)
 
 }
 
+void Citire(FILE *fis1, Team **head, int *nrechipe)
+{
+    int  i, v;
+    char line[100], nume[100]; 
+    if(fscanf(fis1, "%d", nrechipe)!=1)//citesc nr echipe din fisier
+       {
+        printf("Nu se poate citi numarul de echipe\n");
+
+       }
+    fgets(line, sizeof(line), fis1);
+    
+    for( i = 0; i < *nrechipe; i ++){
+        if(fgets(line, sizeof(line), fis1) == NULL)
+        {
+            printf("Eroare la citirea liniei\n");
+        }
+        
+        char *aux;
+        aux = strtok(line, " ");
+        v = atoi(aux);
+
+        aux = strtok(NULL, "\r\n\0");
+        strcpy(nume, aux);
+        
+        addAtBeginning(head, v, nume, fis1);
+        fgets(line, sizeof(line), fis1);
+        
+    }
+}
+
+void Afisare(FILE *fis, Team *head)
+{
+    Team *p;
+    for( p = head; p!=NULL; p=p->next)
+    {
+        //float medie = Punctaj_Echipa(p);
+        fprintf(fis, "%s", p->name); 
+        fprintf(fis, "\n");
+    }
+}
+
+float CMMPunctajEchipa(Team *head)
+{
+    Team *p = head;
+    float medie = Punctaj_Echipa(head);
+    for( p = (head)->next; p!=NULL; p = p->next)
+        if(Punctaj_Echipa(p)<medie)
+            medie = Punctaj_Echipa(p);
+    return medie;
+}
+
+void DeleteFromTeam(Team **head, int nrechipe)
+{
+    Team *p;
+    float punctaj; 
+    int n = putere2(nrechipe);
+    int NRech = nrechipe;
+    while(NRech > n)
+    {
+        punctaj = CMMPunctajEchipa(*head);
+        //fprintf(fis, "%f\n", punctaj);
+        for(p = *head; p!=NULL; p = p->next)
+        {
+            if(Punctaj_Echipa(p) == punctaj)
+                {
+                    delete1Team(head, punctaj);
+                    NRech --;
+                    break;
+                }
+        }
+    }         
+}
+
 
 int main(int argc, char *argv[])
 {
     FILE *fis1, *fis2, *fis3;
-    char line[100], nume[100]; 
+    
+    int cerinte[Ncerinte], i, nrechipe;
 
     fis1 = fopen(argv[2], "r");
     fis2 = fopen(argv[3], "w");
     fis3 = fopen(argv[1], "r");
 
-    Team *head, *p;
-    int v, nrechipe, i;
+    Team *head;
 
     head = NULL;
 
@@ -67,39 +140,33 @@ int main(int argc, char *argv[])
         printf("Fisierul nu poate fi deschis pentru citire\n");
         exit(1);
     }
-    if(fscanf(fis1, "%d", &nrechipe)!=1)//citesc nr echipe din fisier
-       {
-        printf("Nu se poate citi numarul de echipe\n");
-        return 0;
-       }
-    fgets(line, sizeof(line), fis1);
-    
-    for( i = 0; i < nrechipe; i ++){
-        if(fgets(line, sizeof(line), fis1) == NULL)
-        {
-            printf("Eroare la citirea liniei");
-            return 0;
-        }
-        
-        char *aux;
-        aux = strtok(line, " ");
-        v = atoi(aux);
 
-        aux = strtok(NULL, "\r\n\0");
-        strcpy(nume, aux);
+    for( i = 0; i < Ncerinte; i ++)
+        fscanf(fis3, "%d", &cerinte[i]);
+
+    if(cerinte[0])
+        Citire(fis1, &head, &nrechipe);
+
+    if(cerinte[1])
+        DeleteFromTeam(&head, nrechipe);
         
-        addAtBeginning(&head, v, nume, fis1);
-        fgets(line, sizeof(line), fis1);
-        
-    }
+    Afisare(fis2, head);
     
-    for( p = head; p!=NULL; p=p->next)
+    if(cerinte[2])
     {
-        fprintf(fis2, "%s", p->name); 
-        if(p->next!=NULL)
-            fprintf(fis2, "\n");
+
     }
     
+    if(cerinte[3])
+    {
+
+    }
+
+    if(cerinte[4])
+    {
+
+    }*/
+
     fclose(fis1);
     fclose(fis2);
     fclose(fis3);
