@@ -44,3 +44,52 @@ void delete1Team(Team **head, float medie){
         }
     }
 }
+
+Queue* Init(){
+    Queue *q;
+    q = (Queue *)malloc(sizeof(Queue));
+    if(q == NULL)
+        return NULL;
+    q->front = q->rear = NULL;
+    return q;
+}
+
+
+void push(SNode **top, char *name, float score)
+{
+    SNode *newNode = (SNode*)malloc(sizeof(SNode));
+    newNode->TeamName = (char*)malloc(strlen(name)+1);
+    strcpy(newNode->TeamName, name);
+    newNode->points = score+1;
+    newNode->next = *top;
+    *top = newNode;
+}
+int isEmptyS(SNode *top)
+{
+    return top == NULL;
+}
+
+void deleteStack(SNode **top)
+{
+    SNode *temp;
+    while((*top)!=NULL)
+    {
+        temp = *top;
+        *top = (*top)->next;
+        free(temp);
+    }
+}
+
+int isEmptyQ(Queue *q)
+{
+    return (q->front == NULL);
+}
+void deleteQueue(Queue *q){
+    Match *aux;
+    while(!isEmptyQ(q)){
+        aux = q->front;
+        q->front = q->front->next;
+        free(aux);
+    }
+    free(q);
+}

@@ -6,8 +6,8 @@
 
 struct Jucator{
     int points;
-    char nume[L];
-    char prenume[L];
+    char *nume;
+    char *prenume;
 };
 
 typedef struct Jucator Player;
@@ -21,6 +21,33 @@ struct Echipa{
 
 typedef struct Echipa Team;
 
+struct M{
+    char *echipa1, *echipa2;
+    float scor1, scor2;
+    struct M *next;
+};
+typedef struct M Match;
+
+struct Q{
+    Match *front, *rear;
+};
+
+typedef struct Q Queue;
+
+struct Node{
+    char *TeamName;
+    float points;
+    struct Node *next;
+};
+
+typedef struct Node SNode;
+
 int putere2(int NumarEchipe); // functie pentru calculare N maxim
 float Punctaj_Echipa(Team *team); // punctajul mediu al echipei
 void delete1Team(Team **head, float medie); //functie pentru stergerea unei echipe din lista
+Queue* Init();
+void push(SNode **top, char *name, float score);
+int isEmpty(SNode *top);
+void deleteStack(SNode **top);
+int isEmptyQ(Queue *q);
+void deleteQueue(Queue *q);
