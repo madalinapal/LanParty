@@ -42,6 +42,13 @@ struct Node{
 
 typedef struct Node SNode;
 
+struct N{
+    char *TeamName;
+    float points;
+    struct N *left, *right;
+};
+typedef struct N ANode;
+
 int putere2(int NumarEchipe); // functie pentru calculare N maxim
 float Punctaj_Echipa(Team *team); // punctajul mediu al echipei
 void delete1Team(Team **head, float medie); //functie pentru stergerea unei echipe din lista
@@ -51,3 +58,5 @@ int isEmpty(SNode *top);
 void deleteStack(SNode **top);
 int isEmptyQ(Queue *q);
 void deleteQueue(Queue *q);
+void PrintMatches(FILE *fis, Queue *q, int Runda);
+void PrintWinners(FILE *fis, SNode *winners, int Runda);

@@ -93,3 +93,36 @@ void deleteQueue(Queue *q){
     }
     free(q);
 }
+
+void PrintMatches(FILE *fis, Queue *q, int Runda)
+{
+    fprintf(fis, "\n--- ROUND NO:%d\n",Runda);
+    Match *current = q->front;
+    while(current!=NULL)
+    {
+        fprintf(fis, "%-33s-%*s\n",  current->echipa1, 33, current->echipa2);
+        current = current->next;
+    }
+}
+
+void PrintWinners(FILE *fis, SNode *winners, int Runda)
+{
+    fprintf(fis, "\nWINNERS OF ROUND NO:%d\n",Runda);
+    SNode *current = winners;
+    if(current == NULL)
+        printf("Stiva este goala!\n");
+    while(current!=NULL)
+    {
+        if(Runda>=3)
+            {
+                fprintf(fis, "%-34s-", current->TeamName);
+                fprintf(fis,"  %-.2f\n", current->points);
+            }
+        else
+            {
+                fprintf(fis, "%-34s-", current->TeamName);
+                fprintf(fis,"  %-.2f\n", current->points);
+            }
+        current = current->next;
+    }
+}

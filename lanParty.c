@@ -162,14 +162,17 @@ void AdaugareElementInCoadaL(Queue *q, Team *p){
 void AdaugareElementInCoadaS(Queue *q, SNode *p)
 {
     Match *newNode = (Match*)malloc(sizeof(Match));
+
     newNode->echipa1 = (char*)malloc(strlen(p->TeamName) + 1);
     newNode->echipa2 = (char*)malloc(strlen(p->next->TeamName) + 1);
+
     strcpy(newNode->echipa1, p->TeamName);
     strcpy(newNode->echipa2, (p->next)->TeamName);
+
     newNode->scor1 = p->points;
     newNode->scor2 = (p->next)->points;
     newNode->next = NULL;
-
+    
     if(q->rear == NULL)
         q->rear = newNode;
     else{
@@ -194,19 +197,6 @@ void CreateQueueS(Queue *q, SNode *top)
         AdaugareElementInCoadaS(q, p);
 }
 
-void PrintMatches(FILE *fis, Queue *q, int Runda)
-{
-    fprintf(fis, "\n--- ROUND NO:%d\n",Runda);
-    Match *current = q->front;
-    while(current!=NULL)
-    {
-        fprintf(fis, "%-33s-%*s\n",  current->echipa1, 33, current->echipa2);
-        //fprintf(fis, "%-30s - %-30s\n", current->echipa1, current->echipa2);
-
-        current = current->next;
-    }
-}
-
 void CreateStacks(Queue *q, SNode **winners, SNode **defeated)
 {
     Match *current = q->front;
@@ -218,7 +208,7 @@ void CreateStacks(Queue *q, SNode **winners, SNode **defeated)
                 push(defeated, current->echipa2, current->scor2);
                 current->scor1 ++;
             }
-        else
+        else 
             {
                 push(winners, current->echipa2, current->scor2);
                 push(defeated, current->echipa1, current->scor1);
@@ -227,28 +217,78 @@ void CreateStacks(Queue *q, SNode **winners, SNode **defeated)
         current = current->next;
     }
 }
-void PrintWinners(FILE *fis, SNode *winners, int Runda)
+
+void AddPrimele8inceput(SNode **head, SNode *winners) 
 {
-    fprintf(fis, "\nWINNERS OF ROUND NO:%d\n",Runda);
-    SNode *current = winners;
-    if(current == NULL)
-        printf("Stiva este goala!\n");
-    while(current!=NULL)
-    {
-        if(Runda>=3)
-            {
-                fprintf(fis, "%-34s-", current->TeamName);
-                fprintf(fis,"  %-.2f\n", current->points);
-            }
-        else
-            {
-                fprintf(fis, "%-34s-", current->TeamName);
-                fprintf(fis,"  %-.2f\n", current->points);
-            }
-        current = current->next;
-    }
+    SNode *newNode = (SNode*)malloc(sizeof(SNode));
+    newNode->TeamName = (char *)malloc((strlen(winners->TeamName)+1)*sizeof(char));
+    strcpy(newNode->TeamName, winners->TeamName);
+    newNode->points = winners->points;
+
+    newNode->next = *head;
+    *head = newNode;
 }
 
+void AddPrimele8final(SNode **head, SNode *winners)
+{
+    SNode *aux = *head;
+    SNode *newNode = (SNode *)malloc(sizeof(SNode));
+    newNode->TeamName = (char *)malloc((strlen(winners->TeamName)+1)*sizeof(char));
+    strcpy(newNode->TeamName, winners->TeamName);
+    newNode->points = winners->points;
+
+    if(*head == NULL)
+        AddPrimele8inceput(&*head, winners);
+    else{
+        while(aux->next != NULL)
+            aux = aux->next;
+        aux->next = newNode;
+        newNode->next = NULL;
+    }
+
+}
+
+ANode *newnode(SNode *p)
+{
+    ANode *node = (ANode *)malloc(sizeof(ANode));
+    node->left = node->right = NULL;
+    node->TeamName = (char *)malloc((strlen(p->TeamName)+1)*sizeof(char));
+    strcpy(node->TeamName, p->TeamName);
+    node->points = p->points;
+
+    return node;
+}
+
+ANode *insert(ANode *node, SNode *p)
+{
+    if(node == NULL)    
+        return newnode(p);
+    if(p->points < node->points)
+        node->left = insert(node->left, p);
+    else if (p->points > node->points)
+        node->right = insert(node->right, p);
+    else {
+        // Compară numele echipelor în ordine descrescătoare
+        if (strcmp(p->TeamName, node->TeamName) > 0)
+            node->right = insert(node->right, p);
+        else
+            node->left = insert(node->left, p);
+    }
+    return node;
+}
+
+void inOrderTraversal(FILE *fis, ANode* root) {
+    if (root != NULL) {
+        inOrderTraversal(fis, root->right);
+
+        // Vizitează nodul rădăcină
+        fprintf(fis, "%-34s-", root->TeamName);
+        fprintf(fis,"  %-.2f\n", root->points);
+
+        // Parcurge subarborele drept
+        inOrderTraversal(fis, root->left);
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -257,7 +297,9 @@ int main(int argc, char *argv[])
     int cerinte[Ncerinte], i, nrechipe;
     Queue *q;
     SNode *winners = NULL, *defeated = NULL;
+    SNode *primele8 = NULL; // head-ul listei pentru primele 8 echipe 
     q = Init();
+    ANode *root = NULL;
 
     fis1 = fopen(argv[2], "r");
     fis2 = fopen(argv[3], "w");
@@ -290,6 +332,7 @@ int main(int argc, char *argv[])
         DeleteFromTeam(&head, nrechipe);
        
     Afisare(fis2, head);
+
     if(cerinte[2])
     {
         int n = putere2(nrechipe), index = 1;
@@ -314,21 +357,28 @@ int main(int argc, char *argv[])
                 CreateStacks(q, &winners, &defeated);
                 PrintWinners(fis2, winners, index);
             }
+            if(n == 16)
+                for(SNode *p = winners; p!=NULL; p = p->next)
+                   AddPrimele8final(&primele8, p);
+                   
             n = n/2;
             index ++;
         }
     }
-
-    /*if(cerinte[3])
+    
+    if(cerinte[3])
     {
-
+         for(SNode *p = primele8; p!=NULL; p = p->next)
+                root = insert(root, p);
+        fprintf(fis2, "\nTOP 8 TEAMS:\n");
+        inOrderTraversal(fis2, root);
     }
 
-    if(cerinte[4])
+    /*if(cerinte[4])
     {
 
     }*/
-freeTeams(head);
+    freeTeams(head);
     fclose(fis1);
     fclose(fis2);
     fclose(fis3);
