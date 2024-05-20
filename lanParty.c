@@ -1,4 +1,4 @@
-#include "LanParty.h"
+#include "functii.h"
 #define L 15
 #define Ncerinte 5
 
@@ -71,7 +71,6 @@ void Citire(FILE *fis1, Team **head, int *nrechipe)
         addAtBeginning(head, v, nume, fis1);
         free(nume);
         fgets(line, sizeof(line), fis1);
-        
     }
 }
 
@@ -245,7 +244,6 @@ void AddPrimele8final(SNode **head, SNode *winners)
         aux->next = newNode;
         newNode->next = NULL;
     }
-
 }
 
 ANode *newnode(SNode *p)
@@ -268,7 +266,6 @@ ANode *insert(ANode *node, SNode *p)
     else if (p->points > node->points)
         node->right = insert(node->right, p);
     else {
-        // Compară numele echipelor în ordine descrescătoare
         if (strcmp(p->TeamName, node->TeamName) > 0)
             node->right = insert(node->right, p);
         else
@@ -277,16 +274,91 @@ ANode *insert(ANode *node, SNode *p)
     return node;
 }
 
-void inOrderTraversal(FILE *fis, ANode* root) {
+void reverseinOrderTraversal(FILE *fis, ANode* root) {
     if (root != NULL) {
-        inOrderTraversal(fis, root->right);
+        reverseinOrderTraversal(fis, root->right);
 
-        // Vizitează nodul rădăcină
         fprintf(fis, "%-34s-", root->TeamName);
         fprintf(fis,"  %-.2f\n", root->points);
 
-        // Parcurge subarborele drept
-        inOrderTraversal(fis, root->left);
+        reverseinOrderTraversal(fis, root->left);
+    }
+}
+
+
+int comp(AVLNode* node, ANode* p) {
+    if(p->points < node->points)
+        return -1;
+    else if (p->points > node->points)
+        return 1;
+    else
+    {
+        if (strcmp(p->TeamName, node->TeamName) > 0)
+            return 1;
+        else
+            return -1;
+    }
+}
+
+AVLNode* insertavl(AVLNode* node, ANode *p)
+{
+    if(node == NULL){
+        node = (AVLNode *)malloc(sizeof(AVLNode));
+        node->TeamName = (char *)malloc((strlen(p->TeamName)+1)*sizeof(char));
+        strcpy(node->TeamName, p->TeamName);
+        node->points = p->points;
+        node->height = 0;
+        node->left = node->right = NULL;
+        return node;
+    }
+    if(p->points < node->points)
+        node->left = insertavl(node->left, p);
+    else if (p->points > node->points)
+        node->right = insertavl(node->right, p);
+    else
+    {
+        if (strcmp(p->TeamName, node->TeamName) > 0)
+            node->right = insertavl(node->right, p);
+        else
+            node->left = insertavl(node->left, p);
+    }
+
+    node->height = 1 + max(nodeHeight(node->left), nodeHeight(node->right));
+    int k = (nodeHeight(node->left)-nodeHeight(node->right));
+    if(k > 1 && comp(node->left, p) < 0)// p->points < node->left->points)
+        return RightRotation(node);
+    if(k < -1 && comp(node->right, p) > 0)// p->points > node->right->points)
+        return LeftRotation(node);
+    if(k > 1 && comp(node->left, p) > 0) //p->points > node->left->points)
+        return RLRotation(node);
+    if(k < -1 && comp(node->right, p) < 0)// p->points < node->right->points)
+        return LRRotation(node);
+    return node;
+}
+
+void creezAVL(AVLNode **Root, ANode *root)
+{
+    if (root != NULL) {
+        creezAVL(Root, root->right);
+        *Root = insertavl(*Root, root);
+        creezAVL(Root, root->left);
+    }
+}
+
+int getHeight(AVLNode *node) {
+    if (node == NULL)
+        return 0;
+    int leftHeight = getHeight(node->left);
+    int rightHeight = getHeight(node->right);
+    return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
+}
+void printLevelNodes(FILE *fis, AVLNode *Root, int level) {
+    if (Root == NULL) return;
+    if (level == 0) {
+        fprintf(fis, "%s\n", Root->TeamName);
+    } else {
+        printLevelNodes(fis, Root->right, level - 1);
+        printLevelNodes(fis, Root->left, level - 1);
     }
 }
 
@@ -296,15 +368,15 @@ int main(int argc, char *argv[])
     Team *head = NULL;
     int cerinte[Ncerinte], i, nrechipe;
     Queue *q;
-    SNode *winners = NULL, *defeated = NULL;
+    SNode *winners = NULL, *defeated = NULL; //tops pt stivele de castigatori, invinsi
     SNode *primele8 = NULL; // head-ul listei pentru primele 8 echipe 
     q = Init();
     ANode *root = NULL;
+    AVLNode *Root = NULL;
 
     fis1 = fopen(argv[2], "r");
     fis2 = fopen(argv[3], "w");
     fis3 = fopen(argv[1], "r");
-
 
     if(fis1 == NULL)
     {
@@ -325,15 +397,15 @@ int main(int argc, char *argv[])
     for( i = 0; i < Ncerinte; i ++)
         fscanf(fis3, "%d", &cerinte[i]);
 
-    if(cerinte[0])
+    if(cerinte[0])//cerinta 1
         Citire(fis1, &head, &nrechipe);
 
-    if(cerinte[1])
+    if(cerinte[1])//cerinta 2
         DeleteFromTeam(&head, nrechipe);
        
     Afisare(fis2, head);
 
-    if(cerinte[2])
+    if(cerinte[2])//cerinta 3
     {
         int n = putere2(nrechipe), index = 1;
         while(n > 1)
@@ -366,18 +438,21 @@ int main(int argc, char *argv[])
         }
     }
     
-    if(cerinte[3])
+    if(cerinte[3]) //ccerinta 4
     {
          for(SNode *p = primele8; p!=NULL; p = p->next)
-                root = insert(root, p);
+                    root = insert(root, p);
         fprintf(fis2, "\nTOP 8 TEAMS:\n");
-        inOrderTraversal(fis2, root);
+        reverseinOrderTraversal(fis2, root);
+    }
+   
+    if(cerinte[4]) //cerinta 5
+    {
+        creezAVL(&Root, root);
+        fprintf(fis2, "\nTHE LEVEL 2 TEAMS ARE:\n");
+        printLevelNodes(fis2, Root, 2);
     }
 
-    /*if(cerinte[4])
-    {
-
-    }*/
     freeTeams(head);
     fclose(fis1);
     fclose(fis2);
