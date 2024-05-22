@@ -1,5 +1,4 @@
 #include "functii.h"
-#define L 15
 #define Ncerinte 5
 
 void addAtBeginning(Team **head, int v, char *nume, FILE *fis)
@@ -81,30 +80,6 @@ void Afisare(FILE *fis, Team *head)
     {
         fprintf(fis, "%s", p->name); 
         fprintf(fis, "\n");
-    }
-}
-
-void freeTeam(Team *team) {
-    if (team) {
-        free(team->name);
-         if (team->jucatori) {
-            for (int i = 0; i < team->nrj; i++) {
-                free(team->jucatori[i].nume);
-                free(team->jucatori[i].prenume);
-            }
-            free(team->jucatori);
-        
-    }
-        free(team);
-    }
-}
-
-void freeTeams(Team *head) {
-    Team *tmp;
-    while (head) {
-        tmp = head;
-        head = head->next;
-        freeTeam(tmp);
     }
 }
 
@@ -285,21 +260,6 @@ void reverseinOrderTraversal(FILE *fis, ANode* root) {
     }
 }
 
-
-int comp(AVLNode* node, ANode* p) {
-    if(p->points < node->points)
-        return -1;
-    else if (p->points > node->points)
-        return 1;
-    else
-    {
-        if (strcmp(p->TeamName, node->TeamName) > 0)
-            return 1;
-        else
-            return -1;
-    }
-}
-
 AVLNode* insertavl(AVLNode* node, ANode *p)
 {
     if(node == NULL){
@@ -345,13 +305,6 @@ void creezAVL(AVLNode **Root, ANode *root)
     }
 }
 
-int getHeight(AVLNode *node) {
-    if (node == NULL)
-        return 0;
-    int leftHeight = getHeight(node->left);
-    int rightHeight = getHeight(node->right);
-    return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
-}
 void printLevelNodes(FILE *fis, AVLNode *Root, int level) {
     if (Root == NULL) return;
     if (level == 0) {
@@ -438,7 +391,7 @@ int main(int argc, char *argv[])
         }
     }
     
-    if(cerinte[3]) //ccerinta 4
+    if(cerinte[3]) //cerinta 4
     {
          for(SNode *p = primele8; p!=NULL; p = p->next)
                     root = insert(root, p);
@@ -453,7 +406,14 @@ int main(int argc, char *argv[])
         printLevelNodes(fis2, Root, 2);
     }
 
+    
     freeTeams(head);
+    deleteStack(&defeated);
+    deleteStack(&winners);
+    freePrimele8(primele8);
+    freeBST(root);
+    freeAVL(Root);
+
     fclose(fis1);
     fclose(fis2);
     fclose(fis3);

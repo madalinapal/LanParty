@@ -54,7 +54,6 @@ Queue* Init(){
     return q;
 }
 
-
 void push(SNode **top, char *name, float score)
 {
     SNode *newNode = (SNode*)malloc(sizeof(SNode));
@@ -69,30 +68,11 @@ int isEmptyS(SNode *top)
     return top == NULL;
 }
 
-void deleteStack(SNode **top)
-{
-    SNode *temp;
-    while((*top)!=NULL)
-    {
-        temp = *top;
-        *top = (*top)->next;
-        free(temp);
-    }
-}
-
 int isEmptyQ(Queue *q)
 {
     return (q->front == NULL);
 }
-void deleteQueue(Queue *q){
-    Match *aux;
-    while(!isEmptyQ(q)){
-        aux = q->front;
-        q->front = q->front->next;
-        free(aux);
-    }
-    free(q);
-}
+
 
 void PrintMatches(FILE *fis, Queue *q, int Runda)
 {
@@ -127,38 +107,6 @@ void PrintWinners(FILE *fis, SNode *winners, int Runda)
     }
 }
 
-int height(ANode *root)
-{
-    int hs, hd;
-    if(root == NULL)
-        return 0;
-    hs = height(root->left);
-    hd = height(root->right);
-    return 1 + ((hs>hd) ? hs:hd);
-}
-
-void printLevel (ANode *root, int level)
-{
-    if(root == NULL)
-        return;
-    if(level == 1)
-         printf("%s\n", root->TeamName);
-    else if(level > 1){
-        printLevel(root->left, level-1);
-        printLevel(root->right, level-1);
-    }
-}
-
-void levelOrderTraversal(ANode *root)
-{
-    int h = height(root);
-    int i;
-    for(i = 1; i <= h; i ++)
-    {
-        printLevel(root, i);
-        printf("\n");
-    }
-}
 int nodeHeight(AVLNode *root){
     if(root == NULL)
         return -1;
@@ -209,4 +157,26 @@ AVLNode* RLRotation(AVLNode *Z)
 {
     Z->right = RightRotation(Z->right);
     return LeftRotation(Z);
+}
+
+int comp(AVLNode* node, ANode* p) {
+    if(p->points < node->points)
+        return -1;
+    else if (p->points > node->points)
+        return 1;
+    else
+    {
+        if (strcmp(p->TeamName, node->TeamName) > 0)
+            return 1;
+        else
+            return -1;
+    }
+}
+
+int getHeight(AVLNode *node) {
+    if (node == NULL)
+        return 0;
+    int leftHeight = getHeight(node->left);
+    int rightHeight = getHeight(node->right);
+    return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
 }
